@@ -1,0 +1,110 @@
+{{!-- imports --}}
+{{> search/helpers-js }}
+
+{{!-- template --}}
+<div id="implicit-grant-demo">
+  <button @click='getAccessToken()'>Get Token</button>
+  <div v-if="stateError">
+    <h1>Error: State Mismatch</h1>
+  </div>
+  <div v-else-if="accessToken">
+    <h1>Access Token:</h1>
+    <p>${ accessToken }</p>
+  </div>
+</div>
+
+{{!-- component --}}
+<script>
+window.registerApp(function () {
+
+  new Vue({
+    el: '#implicit-grant-demo',
+    delimiters: ['${', '}'],
+
+    data () {
+      return {
+        accessToken: null,
+        stateError: false,
+        config: {
+          url: 'https://accounts.google.com/o/oauth2/v2/auth',
+          params: {
+            client_id: '889281172389-m38l5gg77s0hmp5p2ljt8jj2oari4a7e.apps.googleusercontent.com',
+            redirect_uri: 'http://127.0.0.1:8003/demo',
+            response_type: 'id_token%20token',
+            access_type: 'online',
+            scope: 'email%20openid%20profile'
+          }
+        }
+      }
+    },
+
+    mounted () {
+      let url = window.location
+      
+      if (url.hash) {
+        let access_token = this.getUrlParam(url, 'access_token')
+        let state = this.getUrlParam(url, 'state')
+
+        if (window.localStorage.getItem('state') !== state) {
+          this.stateError = true
+        }
+
+        if (access_token) {
+          this.accessToken = access_token
+        }
+      }
+    },
+
+    methods: {
+      getUrlParam (url, searchParam) {
+        let params = url.hash.split('&')
+
+        return params.find(paramStr => {
+          return paramStr.includes(searchParam)
+        }).split('=')[1]
+      },
+
+      getAccessToken () {
+        let url = this.config.url + '?'
+        let config = this.config.params
+        let state = this.genRandomString(16)
+        let nonce = this.genRandomString(16)
+        window.localStorage.setItem('state', state)
+        config.state = state
+        config.nonce = nonce
+
+        Object.keys(config).forEach(key => {
+          url += `&${key}=${config[key]}`
+        })
+
+        window.location.href = url
+      },
+
+      genRandomString (length) {
+        let charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._~'
+        let result = ''
+
+        while (length > 0) {
+          let bytes = new Uint8Array(16)
+          let random = window.crypto.getRandomValues(bytes)
+
+          random.forEach(function(c) {
+            if (length == 0) {
+                return;
+            }
+            if (c < charset.length) {
+                result += charset[c];
+                length--;
+            }
+          })
+        }
+        return result
+      }
+    }
+  })
+})
+</script>
+
+{{!-- style --}}
+<style>
+</style>
