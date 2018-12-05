@@ -6,7 +6,7 @@
   "private": true,
   "author": "Kong",
   "scripts": {
-    "watch": "node sync",
+    "watch": "WATCH=true node sync",
     "push": "PUSH=true node sync",
     "pull": "PULL=true node sync",
     "wipe": "DELETE_ALL=true node sync"

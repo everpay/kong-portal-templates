@@ -1,15 +1,22 @@
-{{!-- imports --}}
-{{> search/helpers-js }}
-
 {{!-- template --}}
 <div id="implicit-grant-demo">
   <button @click='getAccessToken()'>Get Token</button>
   <div v-if="stateError">
     <h1>Error: State Mismatch</h1>
   </div>
-  <div v-else-if="accessToken">
-    <h1>Access Token:</h1>
-    <p>${ accessToken }</p>
+  <div v-else>
+    <div class="token" v-if="accessToken">
+      <h3>Access Token:</h3>
+      <div class="code-container">
+        <code>${ accessToken }</code>
+      </div>
+    </div>
+    <div class="token" v-if="idToken">
+      <h3>JWT id Token:</h3>
+      <div class="code-container">
+        <code>${ idToken }</code>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -24,6 +31,7 @@ window.registerApp(function () {
     data () {
       return {
         accessToken: null,
+        idToken: null,
         stateError: false,
         config: {
           url: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -43,6 +51,7 @@ window.registerApp(function () {
       
       if (url.hash) {
         let access_token = this.getUrlParam(url, 'access_token')
+        let id_token = this.getUrlParam(url, 'id_token')
         let state = this.getUrlParam(url, 'state')
 
         if (window.localStorage.getItem('state') !== state) {
@@ -51,6 +60,10 @@ window.registerApp(function () {
 
         if (access_token) {
           this.accessToken = access_token
+        }
+
+        if (id_token) {
+          this.idToken = id_token
         }
       }
     },
@@ -107,4 +120,38 @@ window.registerApp(function () {
 
 {{!-- style --}}
 <style>
+#implicit-grant-demo {
+  padding: 24px;
+}
+
+#implicit-grant-demo button {
+  background-color: #4BA370;
+  color: white;
+  border: 1px solid transparent;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  margin: 0 auto;
+}
+
+#implicit-grant-demo .token {
+  max-width: 600px;
+}
+
+#implicit-grant-demo .token .code-container {
+  background: lightgrey;
+  border: 1px solid grey;
+  border-radius: 5px;
+  margin: 12px;
+  padding: 12px;
+}
+
+#implicit-grant-demo .token code {
+  overflow-wrap: break-word;
+}
 </style>
