@@ -10,5 +10,9 @@
     "push": "PUSH=true node sync",
     "pull": "PULL=true node sync",
     "wipe": "DELETE_ALL=true node sync"
+  },
+  "dependencies": {
+    "commander": "^2.19.0",
+    "ora": "^3.0.0"
   }
 }
