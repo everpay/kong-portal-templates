@@ -1,5 +1,5 @@
 const determineSpecExtension = require('./determine-spec-extension')
-const {readFileSync, writeFileSync} = require('fs')
+const {readFileSync, outputFileSync} = require('fs-extra')
 
 module.exports = ({ file, directory }) => {
   let fileName = file.name
@@ -14,20 +14,20 @@ module.exports = ({ file, directory }) => {
   }
 
   let filePath = (directory + fileType + fileName + extension)
-  let message = ''
+  let message = `[skip] ${filePath}`
 
   try {
     let localContents = readFileSync(filePath, 'utf8')
     if (localContents !== contents) {
-      message = `File Updated: ${filePath}`
+      message = `[updated] ${filePath}`
     }
   } catch (e) {
-    message = `File Created: ${filePath}`
+    message = `[created] ${filePath}`
   }
 
   try {
-    writeFileSync(filePath, contents, {flag: 'w'})
-    return Promise.resolve(message)
+    outputFileSync(filePath, contents)
+    return console.log(message)
   } catch (e) {
     return Promise.reject(`Pull Failed! Unable to write file: ${filePath}\n\n\t${e.message}`)
   }

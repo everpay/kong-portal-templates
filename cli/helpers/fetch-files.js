@@ -1,18 +1,26 @@
 const request = require('./request')
 const URL = require('url')
 
-module.exports = function getFiles ({url: requestURL, workspace, token, type}) {
-  let url = `${requestURL}/files`
-  
-  if (workspace) {
-    url = new URL(workspace, url)
-  }
+const fetchFiles = async ({ url: requestURL, workspace, token, type }) => {
+  let records = []
+  let fetching = true
+  let offset = null
+  let url = `${requestURL}`
 
-  if (type) {
-    url += `?type=${type}`
-  }
+  url += workspace ? `/${workspace}` : ``
+  url += `/files?size=100`
+  url += type ? `&type=${type}` : ``
 
-  return Promise.resolve()
-    .then(() => request({ url, token }))
-    .then((res) => JSON.parse(res.body))
+  while (fetching) {
+    let res = await request({ url, token })
+    records = records.concat(res.parsedBody.data)
+    offset = res.offset
+
+    if (!offset) {
+      fetching = false
+      return { data: records }
+    }
+  }
 }
+
+module.exports = fetchFiles
